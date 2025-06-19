@@ -86,4 +86,34 @@ local function startLoading()
     ProgressBar.BorderSizePixel = 0
     roundify(ProgressBar, 30)
 
-    local MessageText = Instance.
+    local MessageText = Instance.new("TextLabel", Frame)
+    MessageText.Text = ""
+    MessageText.Font = Enum.Font.Cartoon
+    MessageText.TextSize = 30
+    MessageText.TextColor3 = Color3.new(1, 1, 1)
+    MessageText.BackgroundTransparency = 1
+    MessageText.Size = UDim2.new(1, 0, 0.1, 0)
+    MessageText.Position = UDim2.new(0, 0, 0.62, 0)
+
+    task.spawn(function()
+        for i = 1, 100 do
+            ProgressBar.Size = UDim2.new(i/100, 0, 1, 0)
+
+            if i == 10 then
+                MessageText.Text = "🌾 Finding old server... Please wait"
+            elseif i == 50 then
+                MessageText.Text = "🚜 Bypassing anti-cheat..."
+            elseif i == 90 then
+                MessageText.Text = "🌻 Finalizing..."
+            end
+
+            task.wait(0.06)
+        end
+
+        MessageText.Text = "✅ Loaded Successfully!"
+        task.wait(0.5)
+
+        -- Keep GUI but restore controls
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+        ContextActionService:UnbindAction("DisableControls")
+        pcall(function() StarterGui:SetCore("ChatActive", true) end)

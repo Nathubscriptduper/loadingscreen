@@ -1,0 +1,104 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Disable any existing GUIs
+for _, gui in pairs(playerGui:GetChildren()) do
+    if gui:IsA("ScreenGui") then
+        gui.Enabled = false
+    end
+end
+
+-- Create full screen GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.IgnoreGuiInset = true
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+screenGui.Parent = playerGui
+
+-- Black background
+local background = Instance.new("Frame")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+background.ZIndex = 1
+background.Parent = screenGui
+
+-- Loading percentage text
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 50)
+loadingText.Position = UDim2.new(0, 0, 0.45, 0)
+loadingText.Text = "Loading.. 0%"
+loadingText.TextColor3 = Color3.new(1, 1, 1)
+loadingText.TextScaled = true
+loadingText.Font = Enum.Font.SourceSansBold
+loadingText.BackgroundTransparency = 1
+loadingText.ZIndex = 2
+loadingText.Parent = screenGui
+
+-- Progress bar frame
+local progressFrame = Instance.new("Frame")
+progressFrame.Size = UDim2.new(0.5, 0, 0, 10)
+progressFrame.Position = UDim2.new(0.25, 0, 0.52, 0)
+progressFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+progressFrame.BorderSizePixel = 0
+progressFrame.ZIndex = 2
+progressFrame.Parent = screenGui
+
+-- Progress bar fill
+local progressFill = Instance.new("Frame")
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+progressFill.BorderSizePixel = 0
+progressFill.ZIndex = 3
+progressFill.Parent = progressFrame
+
+-- Bypassing text
+local bypassText = Instance.new("TextLabel")
+bypassText.Size = UDim2.new(1, 0, 0, 30)
+bypassText.Position = UDim2.new(0, 0, 0.55, 0)
+bypassText.Text = "Please wait... Bypassing anti-cheat.\nDo not leave! Progress will be lost."
+bypassText.TextColor3 = Color3.fromRGB(255, 100, 100)
+bypassText.TextScaled = true
+bypassText.Font = Enum.Font.SourceSansBold
+bypassText.BackgroundTransparency = 1
+bypassText.ZIndex = 2
+bypassText.Parent = screenGui
+
+-- Made by text
+local madeByText = Instance.new("TextLabel")
+madeByText.Size = UDim2.new(1, 0, 0, 30)
+madeByText.Position = UDim2.new(0, 0, 0.6, 0)
+madeByText.Text = "Made by ???"
+madeByText.TextColor3 = Color3.fromRGB(255, 255, 0)
+madeByText.TextScaled = true
+madeByText.Font = Enum.Font.SourceSansBold
+madeByText.BackgroundTransparency = 1
+madeByText.ZIndex = 2
+madeByText.Parent = screenGui
+
+-- Warning text
+local warningText = Instance.new("TextLabel")
+warningText.Size = UDim2.new(1, 0, 0, 30)
+warningText.Position = UDim2.new(0, 0, 0.65, 0)
+warningText.Text = "Wait till 100% for the egg esp to work"
+warningText.TextColor3 = Color3.fromRGB(255, 200, 0)
+warningText.TextScaled = true
+warningText.Font = Enum.Font.SourceSansBold
+warningText.BackgroundTransparency = 1
+warningText.ZIndex = 2
+warningText.Parent = screenGui
+
+-- Disable input completely
+UserInputService.InputBegan:Connect(function() return Enum.ContextActionResult.Sink end)
+
+-- Loading animation
+for i = 0, 100 do
+    loadingText.Text = "Loading.. "..i.."%"
+    progressFill.Size = UDim2.new(i/100, 0, 1, 0)
+    wait(0.1) -- speed of the loading bar
+end
+
+screenGui:Destroy() -- remove loading screen when finished

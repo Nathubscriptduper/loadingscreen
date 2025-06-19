@@ -1,104 +1,98 @@
+-- Make sure this runs on LocalScript
+
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local CoreGui = game:GetService("CoreGui")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+-- Disable Controls
+local StarterGui = game:GetService("StarterGui")
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 
--- Disable any existing GUIs
-for _, gui in pairs(playerGui:GetChildren()) do
-    if gui:IsA("ScreenGui") then
-        gui.Enabled = false
+local ContextActionService = game:GetService("ContextActionService")
+ContextActionService:BindActionAtPriority("DisableControls", function() return Enum.ContextActionResult.Sink end, false, 99999999, unpack(Enum.PlayerActions:GetEnumItems()))
+
+-- Disable Chat
+pcall(function()
+    game:GetService("StarterGui"):SetCore("ChatActive", false)
+end)
+
+-- Disable Escape Menu
+local function blockMenu()
+    if game.CoreGui:FindFirstChild("TopBar") then
+        game.CoreGui.TopBar.Enabled = false
     end
 end
+blockMenu()
 
--- Create full screen GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.IgnoreGuiInset = true
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-screenGui.Parent = playerGui
+-- Fullscreen GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
 
--- Black background
-local background = Instance.new("Frame")
-background.Size = UDim2.new(1, 0, 1, 0)
-background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-background.ZIndex = 1
-background.Parent = screenGui
+local Frame = Instance.new("Frame")
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.Size = UDim2.new(1, 0, 1, 0)
+Frame.Parent = ScreenGui
 
--- Loading percentage text
-local loadingText = Instance.new("TextLabel")
-loadingText.Size = UDim2.new(1, 0, 0, 50)
-loadingText.Position = UDim2.new(0, 0, 0.45, 0)
-loadingText.Text = "Loading.. 0%"
-loadingText.TextColor3 = Color3.new(1, 1, 1)
-loadingText.TextScaled = true
-loadingText.Font = Enum.Font.SourceSansBold
-loadingText.BackgroundTransparency = 1
-loadingText.ZIndex = 2
-loadingText.Parent = screenGui
+local Title = Instance.new("TextLabel")
+Title.Text = "Grow A Garden Script"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 50
+Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0.2, 0)
+Title.Position = UDim2.new(0, 0, 0, 50)
+Title.Parent = Frame
 
--- Progress bar frame
-local progressFrame = Instance.new("Frame")
-progressFrame.Size = UDim2.new(0.5, 0, 0, 10)
-progressFrame.Position = UDim2.new(0.25, 0, 0.52, 0)
-progressFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-progressFrame.BorderSizePixel = 0
-progressFrame.ZIndex = 2
-progressFrame.Parent = screenGui
+local ProgressText = Instance.new("TextLabel")
+ProgressText.Text = "Loading... 0%"
+ProgressText.Font = Enum.Font.GothamBold
+ProgressText.TextSize = 40
+ProgressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+ProgressText.BackgroundTransparency = 1
+ProgressText.Size = UDim2.new(1, 0, 0.1, 0)
+ProgressText.Position = UDim2.new(0, 0, 0.5, 0)
+ProgressText.Parent = Frame
 
--- Progress bar fill
-local progressFill = Instance.new("Frame")
-progressFill.Size = UDim2.new(0, 0, 1, 0)
-progressFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-progressFill.BorderSizePixel = 0
-progressFill.ZIndex = 3
-progressFill.Parent = progressFrame
+local MessageText = Instance.new("TextLabel")
+MessageText.Text = ""
+MessageText.Font = Enum.Font.Gotham
+MessageText.TextSize = 30
+MessageText.TextColor3 = Color3.fromRGB(255, 255, 255)
+MessageText.BackgroundTransparency = 1
+MessageText.Size = UDim2.new(1, 0, 0.1, 0)
+MessageText.Position = UDim2.new(0, 0, 0.6, 0)
+MessageText.Parent = Frame
 
--- Bypassing text
-local bypassText = Instance.new("TextLabel")
-bypassText.Size = UDim2.new(1, 0, 0, 30)
-bypassText.Position = UDim2.new(0, 0, 0.55, 0)
-bypassText.Text = "Please wait... Bypassing anti-cheat.\nDo not leave! Progress will be lost."
-bypassText.TextColor3 = Color3.fromRGB(255, 100, 100)
-bypassText.TextScaled = true
-bypassText.Font = Enum.Font.SourceSansBold
-bypassText.BackgroundTransparency = 1
-bypassText.ZIndex = 2
-bypassText.Parent = screenGui
+-- Loading Simulation
+coroutine.wrap(function()
+    for i = 1, 100 do
+        ProgressText.Text = "Loading... " .. i .. "%"
+        
+        -- Show different messages at specific % ranges
+        if i == 10 then
+            MessageText.Text = "Finding old server. Please wait..."
+        elseif i == 50 then
+            MessageText.Text = "Bypassing anti-cheat..."
+        elseif i == 90 then
+            MessageText.Text = "Finalizing..."
+        end
 
--- Made by text
-local madeByText = Instance.new("TextLabel")
-madeByText.Size = UDim2.new(1, 0, 0, 30)
-madeByText.Position = UDim2.new(0, 0, 0.6, 0)
-madeByText.Text = "Made by ???"
-madeByText.TextColor3 = Color3.fromRGB(255, 255, 0)
-madeByText.TextScaled = true
-madeByText.Font = Enum.Font.SourceSansBold
-madeByText.BackgroundTransparency = 1
-madeByText.ZIndex = 2
-madeByText.Parent = screenGui
+        wait(0.05)
+    end
 
--- Warning text
-local warningText = Instance.new("TextLabel")
-warningText.Size = UDim2.new(1, 0, 0, 30)
-warningText.Position = UDim2.new(0, 0, 0.65, 0)
-warningText.Text = "Wait till 100% for the egg esp to work"
-warningText.TextColor3 = Color3.fromRGB(255, 200, 0)
-warningText.TextScaled = true
-warningText.Font = Enum.Font.SourceSansBold
-warningText.BackgroundTransparency = 1
-warningText.ZIndex = 2
-warningText.Parent = screenGui
+    MessageText.Text = "Loaded Successfully!"
+    wait(1)
 
--- Disable input completely
-UserInputService.InputBegan:Connect(function() return Enum.ContextActionResult.Sink end)
+    -- Remove GUI after loading
+    ScreenGui:Destroy()
 
--- Loading animation
-for i = 0, 100 do
-    loadingText.Text = "Loading.. "..i.."%"
-    progressFill.Size = UDim2.new(i/100, 0, 1, 0)
-    wait(0.1) -- speed of the loading bar
-end
-
-screenGui:Destroy() -- remove loading screen when finished
+    -- Restore Controls after loading (optional)
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+    ContextActionService:UnbindAction("DisableControls")
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("ChatActive", true)
+    end)
+    blockMenu() -- You can comment this if you want to keep blocking the menu
+end)()

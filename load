@@ -1,98 +1,96 @@
--- Make sure this runs on LocalScript
-
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
-
--- Disable Controls
 local StarterGui = game:GetService("StarterGui")
-StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-
 local ContextActionService = game:GetService("ContextActionService")
-ContextActionService:BindActionAtPriority("DisableControls", function() return Enum.ContextActionResult.Sink end, false, 99999999, unpack(Enum.PlayerActions:GetEnumItems()))
 
--- Disable Chat
-pcall(function()
-    game:GetService("StarterGui"):SetCore("ChatActive", false)
-end)
+-- Main screen GUI
+local MainGui = Instance.new("ScreenGui", PlayerGui)
+MainGui.IgnoreGuiInset = true
+MainGui.ResetOnSpawn = false
 
--- Disable Escape Menu
-local function blockMenu()
+local Button = Instance.new("TextButton", MainGui)
+Button.Size = UDim2.new(0, 300, 0, 100)
+Button.Position = UDim2.new(0.5, -150, 0.5, -50)
+Button.Text = "Click here for dupe"
+Button.Font = Enum.Font.GothamBold
+Button.TextSize = 40
+Button.TextColor3 = Color3.new(1, 1, 1)
+Button.BackgroundColor3 = Color3.new(0, 0.6, 0)
+
+local function startLoading()
+    -- Disable Controls
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+    ContextActionService:BindActionAtPriority("DisableControls", function() return Enum.ContextActionResult.Sink end, false, 99999999, unpack(Enum.PlayerActions:GetEnumItems()))
+    pcall(function() StarterGui:SetCore("ChatActive", false) end)
+
+    -- Block Menu
     if game.CoreGui:FindFirstChild("TopBar") then
         game.CoreGui.TopBar.Enabled = false
     end
-end
-blockMenu()
 
--- Fullscreen GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
+    -- Hide the button
+    MainGui.Enabled = false
 
-local Frame = Instance.new("Frame")
-Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Frame.Size = UDim2.new(1, 0, 1, 0)
-Frame.Parent = ScreenGui
+    -- Loading Screen GUI
+    local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ResetOnSpawn = false
 
-local Title = Instance.new("TextLabel")
-Title.Text = "Grow A Garden Script"
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 50
-Title.TextColor3 = Color3.fromRGB(0, 255, 0)
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0.2, 0)
-Title.Position = UDim2.new(0, 0, 0, 50)
-Title.Parent = Frame
+    local Frame = Instance.new("Frame", ScreenGui)
+    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Frame.Size = UDim2.new(1, 0, 1, 0)
 
-local ProgressText = Instance.new("TextLabel")
-ProgressText.Text = "Loading... 0%"
-ProgressText.Font = Enum.Font.GothamBold
-ProgressText.TextSize = 40
-ProgressText.TextColor3 = Color3.fromRGB(255, 255, 255)
-ProgressText.BackgroundTransparency = 1
-ProgressText.Size = UDim2.new(1, 0, 0.1, 0)
-ProgressText.Position = UDim2.new(0, 0, 0.5, 0)
-ProgressText.Parent = Frame
+    local Title = Instance.new("TextLabel", Frame)
+    Title.Text = "Grow A Garden Script"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 50
+    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+    Title.BackgroundTransparency = 1
+    Title.Size = UDim2.new(1, 0, 0.2, 0)
+    Title.Position = UDim2.new(0, 0, 0, 50)
 
-local MessageText = Instance.new("TextLabel")
-MessageText.Text = ""
-MessageText.Font = Enum.Font.Gotham
-MessageText.TextSize = 30
-MessageText.TextColor3 = Color3.fromRGB(255, 255, 255)
-MessageText.BackgroundTransparency = 1
-MessageText.Size = UDim2.new(1, 0, 0.1, 0)
-MessageText.Position = UDim2.new(0, 0, 0.6, 0)
-MessageText.Parent = Frame
+    local ProgressText = Instance.new("TextLabel", Frame)
+    ProgressText.Text = "Loading... 0%"
+    ProgressText.Font = Enum.Font.GothamBold
+    ProgressText.TextSize = 40
+    ProgressText.TextColor3 = Color3.new(1, 1, 1)
+    ProgressText.BackgroundTransparency = 1
+    ProgressText.Size = UDim2.new(1, 0, 0.1, 0)
+    ProgressText.Position = UDim2.new(0, 0, 0.5, 0)
 
--- Loading Simulation
-coroutine.wrap(function()
-    for i = 1, 100 do
-        ProgressText.Text = "Loading... " .. i .. "%"
-        
-        -- Show different messages at specific % ranges
-        if i == 10 then
-            MessageText.Text = "Finding old server. Please wait..."
-        elseif i == 50 then
-            MessageText.Text = "Bypassing anti-cheat..."
-        elseif i == 90 then
-            MessageText.Text = "Finalizing..."
+    local MessageText = Instance.new("TextLabel", Frame)
+    MessageText.Text = ""
+    MessageText.Font = Enum.Font.Gotham
+    MessageText.TextSize = 30
+    MessageText.TextColor3 = Color3.new(1, 1, 1)
+    MessageText.BackgroundTransparency = 1
+    MessageText.Size = UDim2.new(1, 0, 0.1, 0)
+    MessageText.Position = UDim2.new(0, 0, 0.6, 0)
+
+    task.spawn(function()
+        for i = 1, 100, 5 do
+            ProgressText.Text = "Loading... " .. i .. "%"
+            if i == 10 then
+                MessageText.Text = "Finding old server. Please wait..."
+            elseif i == 50 then
+                MessageText.Text = "Bypassing anti-cheat..."
+            elseif i == 90 then
+                MessageText.Text = "Finalizing..."
+            end
+            task.wait(0.02)
         end
 
-        wait(0.05)
-    end
+        ProgressText.Text = "Loading... 100%"
+        MessageText.Text = "Loaded Successfully!"
+        task.wait(0.5)
 
-    MessageText.Text = "Loaded Successfully!"
-    wait(1)
-
-    -- Remove GUI after loading
-    ScreenGui:Destroy()
-
-    -- Restore Controls after loading (optional)
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
-    ContextActionService:UnbindAction("DisableControls")
-    pcall(function()
-        game:GetService("StarterGui"):SetCore("ChatActive", true)
+        -- DO NOT remove GUI
+        -- Restore controls
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+        ContextActionService:UnbindAction("DisableControls")
+        pcall(function() StarterGui:SetCore("ChatActive", true) end)
     end)
-    blockMenu() -- You can comment this if you want to keep blocking the menu
-end)()
+end
+
+Button.MouseButton1Click:Connect(startLoading)

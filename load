@@ -8,6 +8,13 @@ local ContextActionService = game:GetService("ContextActionService")
 local MainGui = Instance.new("ScreenGui", PlayerGui)
 MainGui.IgnoreGuiInset = true
 MainGui.ResetOnSpawn = false
+MainGui.DisplayOrder = 9999 -- Always on top
+
+local FullCover = Instance.new("Frame", MainGui)
+FullCover.Size = UDim2.new(1,0,1,0)
+FullCover.Position = UDim2.new(0,0,0,0)
+FullCover.BackgroundColor3 = Color3.fromRGB(0,0,0)
+FullCover.BackgroundTransparency = 0.5
 
 local Button = Instance.new("TextButton", MainGui)
 Button.Size = UDim2.new(0, 300, 0, 100)
@@ -17,17 +24,13 @@ Button.Font = Enum.Font.GothamBold
 Button.TextSize = 40
 Button.TextColor3 = Color3.new(1, 1, 1)
 Button.BackgroundColor3 = Color3.new(0, 0.6, 0)
+Button.ZIndex = 10
 
 local function startLoading()
     -- Disable Controls
     StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
     ContextActionService:BindActionAtPriority("DisableControls", function() return Enum.ContextActionResult.Sink end, false, 99999999, unpack(Enum.PlayerActions:GetEnumItems()))
     pcall(function() StarterGui:SetCore("ChatActive", false) end)
-
-    -- Block Menu
-    if game.CoreGui:FindFirstChild("TopBar") then
-        game.CoreGui.TopBar.Enabled = false
-    end
 
     -- Hide the button
     MainGui.Enabled = false
@@ -36,6 +39,7 @@ local function startLoading()
     local ScreenGui = Instance.new("ScreenGui", PlayerGui)
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ResetOnSpawn = false
+    ScreenGui.DisplayOrder = 9999
 
     local Frame = Instance.new("Frame", ScreenGui)
     Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
@@ -50,14 +54,17 @@ local function startLoading()
     Title.Size = UDim2.new(1, 0, 0.2, 0)
     Title.Position = UDim2.new(0, 0, 0, 50)
 
-    local ProgressText = Instance.new("TextLabel", Frame)
-    ProgressText.Text = "Loading... 0%"
-    ProgressText.Font = Enum.Font.GothamBold
-    ProgressText.TextSize = 40
-    ProgressText.TextColor3 = Color3.new(1, 1, 1)
-    ProgressText.BackgroundTransparency = 1
-    ProgressText.Size = UDim2.new(1, 0, 0.1, 0)
-    ProgressText.Position = UDim2.new(0, 0, 0.5, 0)
+    local ProgressBarBackground = Instance.new("Frame", Frame)
+    ProgressBarBackground.Size = UDim2.new(0.6, 0, 0.05, 0)
+    ProgressBarBackground.Position = UDim2.new(0.2, 0, 0.5, 0)
+    ProgressBarBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    ProgressBarBackground.BorderSizePixel = 0
+
+    local ProgressBar = Instance.new("Frame", ProgressBarBackground)
+    ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+    ProgressBar.Position = UDim2.new(0, 0, 0, 0)
+    ProgressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    ProgressBar.BorderSizePixel = 0
 
     local MessageText = Instance.new("TextLabel", Frame)
     MessageText.Text = ""
@@ -69,8 +76,9 @@ local function startLoading()
     MessageText.Position = UDim2.new(0, 0, 0.6, 0)
 
     task.spawn(function()
-        for i = 1, 100, 5 do
-            ProgressText.Text = "Loading... " .. i .. "%"
+        for i = 1, 100 do
+            ProgressBar.Size = UDim2.new(i/100, 0, 1, 0)
+
             if i == 10 then
                 MessageText.Text = "Finding old server. Please wait..."
             elseif i == 50 then
@@ -78,15 +86,14 @@ local function startLoading()
             elseif i == 90 then
                 MessageText.Text = "Finalizing..."
             end
-            task.wait(0.02)
+
+            task.wait(0.04) -- slower now
         end
 
-        ProgressText.Text = "Loading... 100%"
         MessageText.Text = "Loaded Successfully!"
         task.wait(0.5)
 
         -- DO NOT remove GUI
-        -- Restore controls
         StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
         ContextActionService:UnbindAction("DisableControls")
         pcall(function() StarterGui:SetCore("ChatActive", true) end)

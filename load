@@ -4,27 +4,45 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 local StarterGui = game:GetService("StarterGui")
 local ContextActionService = game:GetService("ContextActionService")
 
--- Main screen GUI
+-- Main GUI setup
 local MainGui = Instance.new("ScreenGui", PlayerGui)
 MainGui.IgnoreGuiInset = true
 MainGui.ResetOnSpawn = false
-MainGui.DisplayOrder = 9999 -- Always on top
+MainGui.DisplayOrder = 9999
 
-local FullCover = Instance.new("Frame", MainGui)
-FullCover.Size = UDim2.new(1,0,1,0)
-FullCover.Position = UDim2.new(0,0,0,0)
-FullCover.BackgroundColor3 = Color3.fromRGB(0,0,0)
-FullCover.BackgroundTransparency = 0.5
+-- Background color (bright like farm game)
+local Background = Instance.new("Frame", MainGui)
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.BackgroundColor3 = Color3.fromRGB(135, 206, 250) -- Sky Blue
 
+-- Decorative sun
+local Sun = Instance.new("Frame", Background)
+Sun.Size = UDim2.new(0, 200, 0, 200)
+Sun.Position = UDim2.new(1, -220, 0, 20)
+Sun.BackgroundColor3 = Color3.fromRGB(255, 223, 0)
+Sun.BackgroundTransparency = 0
+Sun.BorderSizePixel = 0
+Sun.AnchorPoint = Vector2.new(0, 0)
+Sun.ZIndex = 0
+Sun.ClipsDescendants = true
+Sun:Create("UICorner").CornerRadius = UDim.new(1, 0)
+
+-- Rounded corner function
+local function roundify(obj, radius)
+	local corner = Instance.new("UICorner", obj)
+	corner.CornerRadius = UDim.new(0, radius)
+end
+
+-- Dupe Button
 local Button = Instance.new("TextButton", MainGui)
 Button.Size = UDim2.new(0, 300, 0, 100)
 Button.Position = UDim2.new(0.5, -150, 0.5, -50)
-Button.Text = "Click here for dupe"
-Button.Font = Enum.Font.GothamBold
-Button.TextSize = 40
-Button.TextColor3 = Color3.new(1, 1, 1)
-Button.BackgroundColor3 = Color3.new(0, 0.6, 0)
-Button.ZIndex = 10
+Button.Text = "🌻  Click here for Dupe"
+Button.Font = Enum.Font.Cartoon
+Button.TextSize = 35
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+roundify(Button, 20)
 
 local function startLoading()
     -- Disable Controls
@@ -42,62 +60,30 @@ local function startLoading()
     ScreenGui.DisplayOrder = 9999
 
     local Frame = Instance.new("Frame", ScreenGui)
-    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Frame.BackgroundColor3 = Color3.fromRGB(135, 206, 250) -- Sky blue
     Frame.Size = UDim2.new(1, 0, 1, 0)
 
     local Title = Instance.new("TextLabel", Frame)
-    Title.Text = "Grow A Garden Script"
-    Title.Font = Enum.Font.GothamBold
+    Title.Text = "🌱 Grow A Garden Script 🌻"
+    Title.Font = Enum.Font.Cartoon
     Title.TextSize = 50
-    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
     Title.Size = UDim2.new(1, 0, 0.2, 0)
     Title.Position = UDim2.new(0, 0, 0, 50)
 
     local ProgressBarBackground = Instance.new("Frame", Frame)
-    ProgressBarBackground.Size = UDim2.new(0.6, 0, 0.05, 0)
+    ProgressBarBackground.Size = UDim2.new(0.6, 0, 0.06, 0)
     ProgressBarBackground.Position = UDim2.new(0.2, 0, 0.5, 0)
-    ProgressBarBackground.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    ProgressBarBackground.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     ProgressBarBackground.BorderSizePixel = 0
+    roundify(ProgressBarBackground, 30)
 
     local ProgressBar = Instance.new("Frame", ProgressBarBackground)
     ProgressBar.Size = UDim2.new(0, 0, 1, 0)
     ProgressBar.Position = UDim2.new(0, 0, 0, 0)
-    ProgressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    ProgressBar.BackgroundColor3 = Color3.fromRGB(50, 205, 50) -- Green
     ProgressBar.BorderSizePixel = 0
+    roundify(ProgressBar, 30)
 
-    local MessageText = Instance.new("TextLabel", Frame)
-    MessageText.Text = ""
-    MessageText.Font = Enum.Font.Gotham
-    MessageText.TextSize = 30
-    MessageText.TextColor3 = Color3.new(1, 1, 1)
-    MessageText.BackgroundTransparency = 1
-    MessageText.Size = UDim2.new(1, 0, 0.1, 0)
-    MessageText.Position = UDim2.new(0, 0, 0.6, 0)
-
-    task.spawn(function()
-        for i = 1, 100 do
-            ProgressBar.Size = UDim2.new(i/100, 0, 1, 0)
-
-            if i == 10 then
-                MessageText.Text = "Finding old server. Please wait..."
-            elseif i == 50 then
-                MessageText.Text = "Bypassing anti-cheat..."
-            elseif i == 90 then
-                MessageText.Text = "Finalizing..."
-            end
-
-            task.wait(0.04) -- slower now
-        end
-
-        MessageText.Text = "Loaded Successfully!"
-        task.wait(0.5)
-
-        -- DO NOT remove GUI
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
-        ContextActionService:UnbindAction("DisableControls")
-        pcall(function() StarterGui:SetCore("ChatActive", true) end)
-    end)
-end
-
-Button.MouseButton1Click:Connect(startLoading)
+    local MessageText = Instance.
